@@ -1,4 +1,4 @@
-"""Implementación de regresión lineal para el homework."""
+"""Implementación de regresión lineal desde cero."""
 
 import numpy as np
 import pandas as pd
@@ -75,6 +75,33 @@ class LinearRegression:
         ss_tot = np.sum((y - np.mean(y)) ** 2)
         
         return 1 - (ss_res / ss_tot)
+    
+    def get_params(self) -> dict:
+        """
+        Obtener parámetros del modelo.
+        
+        Returns:
+            Diccionario con los parámetros del modelo
+        """
+        if not self.is_fitted:
+            return {"intercept": None, "coefficients": None}
+        
+        return {
+            "intercept": self.intercept,
+            "coefficients": self.coefficients.tolist()
+        }
+    
+    def set_params(self, intercept: float, coefficients: np.ndarray) -> None:
+        """
+        Establecer parámetros del modelo.
+        
+        Args:
+            intercept: Valor del intercepto
+            coefficients: Array de coeficientes
+        """
+        self.intercept = intercept
+        self.coefficients = np.array(coefficients)
+        self.is_fitted = True
 
 
 def load_data(file_path: str = "files/input/data.csv") -> Tuple[np.ndarray, np.ndarray]:
@@ -93,9 +120,12 @@ def load_data(file_path: str = "files/input/data.csv") -> Tuple[np.ndarray, np.n
     return X, y
 
 
-def train_and_evaluate_model():
+def train_model_with_data():
     """
-    Función principal para entrenar y evaluar el modelo con los datos proporcionados.
+    Función para entrenar el modelo con los datos del archivo CSV.
+    
+    Returns:
+        Tupla con (modelo, X, y, predicciones)
     """
     # Cargar datos
     X, y = load_data()
@@ -106,6 +136,13 @@ def train_and_evaluate_model():
     
     # Hacer predicciones
     y_pred = model.predict(X)
+    
+    return model, X, y, y_pred
+
+
+if __name__ == "__main__":
+    # Ejecutar entrenamiento y mostrar resultados
+    model, X, y, y_pred = train_model_with_data()
     
     # Calcular métricas
     r2_score = model.score(X, y)
@@ -118,13 +155,10 @@ def train_and_evaluate_model():
     print(f"R² Score: {r2_score:.4f}")
     print(f"MSE: {mse:.4f}")
     print(f"RMSE: {rmse:.4f}")
-    print("\n=== Primeras 5 predicciones vs valores reales ===")
-    for i in range(5):
-        print(f"Real: {y[i]:.4f}, Predicho: {y_pred[i]:.4f}, Error: {abs(y[i] - y_pred[i]):.4f}")
     
-    return model, X, y, y_pred
-
-
-if __name__ == "__main__":
-    # Ejecutar entrenamiento y evaluación
-    model, X, y, y_pred = train_and_evaluate_model()
+    # Mostrar algunos ejemplos
+    print("\n=== Ejemplos de Predicciones ===")
+    for i in range(min(5, len(y))):
+        print(f"Muestra {i+1}: x1={X[i,0]:.3f}, x2={X[i,1]:.3f}")
+        print(f"  Real: {y[i]:.4f}, Predicho: {y_pred[i]:.4f}")
+        print(f"  Error: {abs(y[i] - y_pred[i]):.4f}\n")
